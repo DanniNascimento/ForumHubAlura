@@ -41,19 +41,23 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        var tpkenJWT = recuperarToken(request);
+        var tokenJWT = recuperarToken(request);
 
-        if (tpkenJWT != null){
-            var subject = tokenService.getSujeito(tpkenJWT);
-            var usuario = usuarioRepository.findByEmail(subject);
+        if (tokenJWT != null) {
+            var subject = tokenService.getSujeito(tokenJWT);
+            var usuarioOptional = usuarioRepository.findByEmail(subject);
 
-            var autenticacao = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(autenticacao);
+            if (usuarioOptional.isPresent()) {
+                var usuario = usuarioOptional.get();
+
+                // Cria a autenticação com o usuário recuperado e suas autoridades
+                var autenticacao = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(autenticacao);
+            }
         }
 
         filterChain.doFilter(request, response);
     }
-
 
     /**
      * Recupera o token JWT do cabeçalho "Authorization" da requisição.

@@ -118,6 +118,7 @@ public class Usuario implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Exemplo com papel único "ROLE_USER". Expanda para múltiplos papéis, se necessário.
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
